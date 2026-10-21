@@ -37,3 +37,7 @@ docker compose exec app npm run seed
 ## Checks
 
 `docker compose config --quiet` validates Compose without printing credentials. `docker compose down` stops the app and does not delete data on the external MySQL server.
+
+## CORS origins
+
+Set `CORS_ORIGINS` in `.env` to a comma-separated list, for example `https://hospital.example.com,http://192.168.1.20:3000`. Origins must include the scheme and optional port, with no path or trailing slash. Only listed origins receive API CORS headers; credentialed requests are supported. Wildcards are not supported. An empty setting grants no cross-origin browser access. Same-origin and server-to-server requests continue to work. CORS does not replace authentication. After changing `.env`, run `docker compose up -d --force-recreate app` (use `--build` when deploying this code change).
