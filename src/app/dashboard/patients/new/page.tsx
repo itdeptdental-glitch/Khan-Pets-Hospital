@@ -4,5 +4,5 @@ import { authOptions } from '@/lib/auth/auth'
 import { getPatientData } from '@/lib/patients/store'
 import { PatientManager } from '@/components/patients/patient-manager'
 export const dynamic='force-dynamic'
-export default async function NewPatientPage(){if(!await getServerSession(authOptions))redirect('/login');return <PatientManager initialData={await getPatientData()} newPatient/>}
+export default async function NewPatientPage(){const session=await getServerSession(authOptions);if(!session)redirect('/login');return <PatientManager canLoadDemo={(session.user as {role?:string})?.role==='ADMIN'} initialData={await getPatientData()} newPatient/>}
 

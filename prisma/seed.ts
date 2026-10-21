@@ -1,3 +1,4 @@
+import { seedDemoPatients } from '../src/lib/patients/demo'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
@@ -83,6 +84,8 @@ async function main() {
     },
   })
 
+  const demo = await seedDemoPatients(prisma)
+  console.log(`Demo patients added: ${demo.added}`)
   console.log('Database seeded successfully!')
   console.log('Admin credentials: admin@hospital.com / admin123')
   console.log('Doctor credentials: doctor@hospital.com / doctor123')

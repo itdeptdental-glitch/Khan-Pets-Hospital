@@ -41,3 +41,9 @@ docker compose exec app npm run seed
 ## CORS origins
 
 Set `CORS_ORIGINS` in `.env` to a comma-separated list, for example `https://hospital.example.com,http://192.168.1.20:3000`. Origins must include the scheme and optional port, with no path or trailing slash. Only listed origins receive API CORS headers; credentialed requests are supported. Wildcards are not supported. An empty setting grants no cross-origin browser access. Same-origin and server-to-server requests continue to work. CORS does not replace authentication. After changing `.env`, run `docker compose up -d --force-recreate app` (use `--build` when deploying this code change).
+
+## Demonstrating patients
+
+Run `docker compose exec app npm run seed` to create the default demo accounts plus 10 fictional pets and 6 fictional owners. Sign in with `admin@hospital.com` / `admin123`, then open `/dashboard/patients`. Alternatively, an administrator can use **Load demo patients** and confirm in the page. Demo records use stable IDs; repeating the seed preserves edits and does not duplicate records. Clinical examples are added when an active veterinarian exists. Demo loading is optional and never runs automatically on startup.
+
+Try searching Luna, filtering to cats, viewing history, changing a weight or owner, and registering a new patient. Remove a patient with no care records to demonstrate deletion; patients with clinical records are protected. Fictional records have a Demo badge and example.invalid email addresses.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { databaseUrl } from './database.mjs'
 import { randomUUID } from 'node:crypto'
 import mysql from 'mysql2/promise'
-const base='http://localhost:3000'
+const base=process.env.TEST_BASE_URL||'http://localhost:3000'
 const cookies=new Map()
 async function request(path,method='GET',body,form=false){
  const response=await fetch(base+path,{method,redirect:'manual',headers:{cookie:[...cookies].map(([key,value])=>`${key}=${value}`).join('; '),...(body?{'Content-Type':form?'application/x-www-form-urlencoded':'application/json'}:{})},body:body?(form?new URLSearchParams(body):JSON.stringify(body)):undefined})
@@ -19,8 +19,10 @@ const createdOwners=[]
 let petId
 try{
  assert.equal((await request('/api/owners')).status,401,'Owner details require sign-in')
+ assert.equal((await request('/api/patients/demo','POST')).status,401,'Demo loading requires sign-in')
+ assert.equal((await request('/api/patients','DELETE',{id:'not-a-patient'})).status,401,'Removal requires sign-in')
  const csrf=await request('/api/auth/csrf')
- await request('/api/auth/callback/credentials','POST',{csrfToken:csrf.data.csrfToken,email:process.env.TEST_EMAIL||'admin@khanpets.com',password:process.env.TEST_PASSWORD||'admin123',callbackUrl:base+'/dashboard',json:'true'},true)
+ await request('/api/auth/callback/credentials','POST',{csrfToken:csrf.data.csrfToken,email:process.env.TEST_EMAIL||'admin@hospital.com',password:process.env.TEST_PASSWORD||'admin123',callbackUrl:base+'/dashboard',json:'true'},true)
  assert.equal((await request('/api/owners')).status,200,'Local sign-in succeeded')
  const owner={firstName:marker,lastName:'Temporary',phone:'03000000000',email:'owner@example.invalid',address:'Temporary verification address',emergencyContact:'Test contact',emergencyPhone:'03000000001'}
  const one=await request('/api/owners','POST',owner)
@@ -57,6 +59,17 @@ try{
  assert.equal(duplicate.status,409,'Duplicate microchip rejected')
  const ownerList=await request('/api/owners')
  assert.ok(!ownerList.data.some(item=>item.firstName===marker&&item.lastName==='Rollback'),'Failed pet registration rolls back owner creation')
+ const protectedPet=await request('/api/patients','DELETE',{id:'demo-pet-1'})
+ assert.equal(protectedPet.status,409,'Clinical history blocks patient removal')
+ const demo=await request('/api/patients/demo','POST')
+ assert.equal(demo.status,200);assert.equal(demo.data.added,0,'Demo loading is repeatable')
+ const sample=demo.data.data.pets.find(pet=>pet.id==='demo-pet-1')
+ assert.equal(sample.canRemove,false);assert.ok(sample.appointments.length);assert.ok(sample.medicalRecords.length);assert.ok(sample.vaccinations.length)
+ const html=await fetch(base+'/dashboard/patients',{headers:{cookie:[...cookies].map(([key,value])=>`${key}=${value}`).join('; ')}})
+ assert.equal(html.status,200);const markup=await html.text();assert.ok(markup.includes('Load demo patients'));assert.ok(markup.includes('All species'));assert.ok(markup.includes('Luna'))
+ assert.equal((await request('/api/patients','DELETE',{id:petId})).status,200,'Unlinked patient can be removed')
+ assert.equal((await request('/api/patients','DELETE',{id:petId})).status,404,'Repeated patient deletion reports missing')
+ console.log('Passed: demo repeatability, clinical history, protected deletion, patient page rendering.')
  console.log('Passed: authenticated access, owner creation/edit/optional-field removal, linked-owner deletion protection, pet registration/reassignment, persistence, validation, and owner removal.')
 }finally{
  if(petId)await db.execute('DELETE FROM Pet WHERE id=? AND name=?',[petId,marker])

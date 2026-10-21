@@ -42,3 +42,23 @@ async function write(request:Request,update:boolean){
 }
 export async function POST(request:Request){return write(request,false)}
 export async function PATCH(request:Request){return write(request,true)}
+
+export async function DELETE(request: Request) {
+ if (!await getServerSession(authOptions)) return NextResponse.json({error:'Please sign in to manage patients.'},{status:401})
+ let body
+ try { body = await request.json() } catch { return NextResponse.json({error:'Invalid request.'},{status:400}) }
+ if (typeof body?.id !== 'string' || !body.id || body.id.length > 191) return NextResponse.json({error:'Invalid patient ID.'},{status:400})
+ try {
+  const outcome = await prisma.$transaction(async tx => {
+   const rows = await tx.$queryRaw<{id:string}[]>`SELECT id FROM Pet WHERE id=${body.id} FOR UPDATE`
+   if (!rows.length) return 'missing'
+   const pet = await tx.pet.findUniqueOrThrow({where:{id:body.id},select:{_count:{select:{appointments:true,medicalRecords:true,vaccinations:true,boarding:true,grooming:true,procedures:true}}}})
+   if (Object.values(pet._count).some(count=>count>0)) return 'linked'
+   await tx.pet.delete({where:{id:body.id}})
+   return 'removed'
+  })
+  if (outcome==='missing') return NextResponse.json({error:'Patient no longer exists.'},{status:404})
+  if (outcome==='linked') return NextResponse.json({error:'This patient has appointments or care records and cannot be removed. Its clinical history must be retained.'},{status:409})
+  return NextResponse.json({data:await getPatientData()})
+ } catch(error) { console.error('Patient removal failed',error); return NextResponse.json({error:'Unable to remove patient.'},{status:500}) }
+}
