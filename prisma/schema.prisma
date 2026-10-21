@@ -1,0 +1,258 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      UserRole @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staffProfile Staff?
+  sessions     Session[]
+}
+
+enum UserRole {
+  ADMIN
+  VETERINARIAN
+  STAFF
+}
+
+model Staff {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  specialty   String?
+  phone       String?
+  department  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appointments   Appointment[]
+  medicalRecords  MedicalRecord[]
+  vaccinations   Vaccination[]
+}
+
+model Owner {
+  id              String   @id @default(cuid())
+  firstName       String
+  lastName        String
+  phone           String
+  email           String?
+  address         String?
+  emergencyContact String?
+  emergencyPhone  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  pets Pet[]
+}
+
+model Pet {
+  id              String   @id @default(cuid())
+  ownerId         String
+  owner           Owner    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name            String
+  species         String
+  breed           String?
+  age             Int
+  weight          Float
+  gender          String
+  color           String?
+  microchipId     String?  @unique
+  dateOfBirth     DateTime?
+  allergies       String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  appointments   Appointment[]
+  medicalRecords  MedicalRecord[]
+  vaccinations   Vaccination[]
+  boarding       Boarding[]
+  grooming        Grooming[]
+  procedures      PetProcedure[]
+}
+
+model Appointment {
+  id          String              @id @default(cuid())
+  petId       String
+  pet         Pet                 @relation(fields: [petId], references: [id], onDelete: Cascade)
+  veterinarianId String
+  veterinarian Staff               @relation(fields: [veterinarianId], references: [id], onDelete: Cascade)
+  date        DateTime
+  time        String
+  status      AppointmentStatus   @default(SCHEDULED)
+  reason      String?
+  notes       String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model MedicalRecord {
+  id          String   @id @default(cuid())
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  veterinarianId String
+  veterinarian Staff    @relation(fields: [veterinarianId], references: [id], onDelete: Cascade)
+  diagnosis   String
+  symptoms    String?
+  treatment   String?
+  prescription String?
+  notes       String?
+  visitDate   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Vaccination {
+  id          String   @id @default(cuid())
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  veterinarianId String
+  veterinarian Staff    @relation(fields: [veterinarianId], references: [id], onDelete: Cascade)
+  vaccineName String
+  vaccineType String
+  dateAdministered DateTime
+  nextDueDate DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Equipment {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+  quantity    Int      @default(0)
+  status      String   @default("AVAILABLE")
+  purchaseDate DateTime?
+  lastMaintenanceDate DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Medicine {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+  quantity    Int      @default(0)
+  unit        String?
+  expiryDate  DateTime?
+  manufacturer String?
+  price       Float?
+  status      String   @default("IN_STOCK")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PetFood {
+  id          String   @id @default(cuid())
+  name        String
+  brand       String?
+  category    String
+  description String?
+  quantity    Int      @default(0)
+  unit        String
+  weight      Float
+  price       Float?
+  expiryDate  DateTime?
+  species     String
+  ageGroup    String?
+  status      String   @default("IN_STOCK")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Boarding {
+  id          String   @id @default(cuid())
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  kennelNumber String
+  checkInDate DateTime
+  checkOutDate DateTime
+  status      String   @default("ACTIVE")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Grooming {
+  id          String   @id @default(cuid())
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  serviceType String
+  groomer     String?
+  date        DateTime
+  status      String   @default("SCHEDULED")
+  notes       String?
+  price       Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InventoryItem {
+  id           String   @id @default(uuid())
+  name         String
+  category     String
+  brand        String?
+  quantity     Int      @default(0)
+  unit         String   @default("pieces") @db.VarChar(30)
+  price        Decimal? @db.Decimal(10, 2)
+  reorderLevel Int      @default(5)
+  expiryDate   DateTime?
+  description  String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category])
+}
+
+model PetProcedure {
+ id          String @id @default(uuid())
+ petId       String
+ pet         Pet @relation(fields: [petId], references: [id], onDelete: Restrict)
+ name        String
+ category    String
+ date        DateTime
+ status      String @default("Scheduled")
+ performedBy String?
+ fee         Decimal? @db.Decimal(10, 2)
+ notes       String? @db.Text
+ createdAt   DateTime @default(now())
+ updatedAt   DateTime @updatedAt
+
+ @@index([date])
+ @@index([category])
+}
