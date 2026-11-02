@@ -1,0 +1,32 @@
+'use client'
+import { useState, type FormEvent } from 'react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { reportTypes, type ReportType, type ReportResult } from '@/lib/reports/types'
+// Quote every cell and neutralize spreadsheet formulas in user-entered text.
+function csvCell(value:string|number){const text=String(value);return '"'+(typeof value==='string'&&/^[\s]*[=+@-]/.test(text)?"'"+text:text).replaceAll('"','""')+'"'}
+export function ReportManager(){
+ const [type,setType]=useState<ReportType>('patients')
+ const [from,setFrom]=useState('');const [to,setTo]=useState('');const [query,setQuery]=useState('')
+ const [report,setReport]=useState<ReportResult|null>(null)
+ const [period,setPeriod]=useState('All dates');const [generated,setGenerated]=useState('')
+ const [loading,setLoading]=useState(false);const [error,setError]=useState('');const [page,setPage]=useState(1)
+ const rows=report?.rows.filter(row=>row.some(value=>String(value).toLowerCase().includes(query.trim().toLowerCase())))??[]
+ const pages=Math.max(1,Math.ceil(rows.length/50));const current=Math.min(page,pages)
+ async function generate(event:FormEvent){event.preventDefault();setLoading(true);setError('');setReport(null);setQuery('');setPage(1)
+ try{const response=await fetch('/api/reports?'+new URLSearchParams({type,from,to}),{cache:'no-store'});const data=await response.json();if(!response.ok)throw new Error(data.error||'Unable to generate report.');setReport(data);setPeriod((from||'Beginning')+' to '+(to||'Today'));setGenerated(new Date().toLocaleString())}catch(error){setError(error instanceof Error?error.message:'Unable to generate report.')}finally{setLoading(false)}}
+ function download(){if(!report)return;const content='\uFEFF'+[report.columns,...rows].map(row=>row.map(csvCell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8;'}));const link=document.createElement('a');link.href=url;link.download=report.title.toLowerCase().replaceAll(' ','-')+'-report.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+ return <div className="space-y-6 reports-page"><div className="report-controls"><p className="eyebrow mb-1">Practice insights</p><h1>Reports</h1><p>Generate, search, download and print your practice records.</p></div>
+ <div className="report-controls"><Card><CardHeader><h2 className="font-semibold">Generate a report</h2></CardHeader><CardContent><form onSubmit={generate} className="grid grid-cols-1 md:grid-cols-4 gap-5 items-end"><label className="inventory-field">Report type<select disabled={loading} value={type} onChange={event=>setType(event.target.value as ReportType)}>{Object.entries(reportTypes).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label><label className="inventory-field">From date<input disabled={loading} type="date" value={from} max={to||undefined} onChange={event=>setFrom(event.target.value)}/></label><label className="inventory-field">To date<input disabled={loading} type="date" value={to} min={from||undefined} onChange={event=>setTo(event.target.value)}/></label><Button type="submit" disabled={loading}>{loading?'Generating…':'Generate report'}</Button><p className="text-xs text-slate-500 md:col-span-4">Leave dates empty for all records. Appointments and services use their event date; patients, owners, staff and inventory use their creation date. Inventory quantities show current stock.</p></form></CardContent></Card></div>
+ {error&&<p role="alert" className="rounded-lg bg-red-50 text-red-700 p-4">{error}</p>}
+ {!report&&!loading&&!error&&<Card><CardContent><p className="text-sm text-slate-500 py-6">Choose a report and select Generate report to preview your records.</p></CardContent></Card>}
+ {loading&&<p role="status">Generating report…</p>}
+ {report&&<section aria-label="Generated report" className="report-output"><Card><CardHeader><div className="flex flex-wrap justify-between gap-4 items-center"><div><p className="eyebrow mb-1">Khan Pets Hospital</p><h2 className="text-lg font-semibold">{report.title} report</h2><p className="text-xs text-slate-500 mt-2">{report.dateBasis}: {period} · Generated {generated}</p><p className="text-sm mt-2" role="status">{rows.length} matching records{query?' (filtered from '+report.rows.length+')':''}</p></div><div className="flex gap-3 report-controls"><Button variant="secondary" disabled={!rows.length} onClick={download}>Download CSV</Button><Button variant="secondary" onClick={()=>window.print()}>Print / Save PDF</Button></div></div></CardHeader><CardContent>
+ {report.note&&<p className="rounded-lg bg-amber-50 text-amber-900 text-sm p-4 mb-5">{report.note}</p>}
+ {report.truncated&&<p className="text-sm text-amber-800 mb-4">Showing the first 10,000 records. Narrow the date range for a complete report.</p>}
+ <label className="inventory-field mb-5 report-controls">Search generated report<input type="search" value={query} onChange={event=>{setQuery(event.target.value);setPage(1)}} placeholder="Search patient, owner, status, category…"/></label>
+ {query&&<p className="text-xs mb-3">Search filter: {query}</p>}
+ {rows.length?<><div className="overflow-x-auto report-screen-table"><table><caption className="sr-only">{report.title} report</caption><thead><tr>{report.columns.map(column=><th scope="col" key={column} className="text-left whitespace-nowrap">{column}</th>)}</tr></thead><tbody>{rows.slice((current-1)*50,current*50).map((row,index)=><tr key={index}>{row.map((value,i)=><td className="text-xs" key={i}>{value===''?'—':value}</td>)}</tr>)}</tbody></table></div><div className="report-print-table"><table><thead><tr>{report.columns.map(column=><th key={column}>{column}</th>)}</tr></thead><tbody>{rows.map((row,index)=><tr key={index}>{row.map((value,i)=><td key={i}>{value===''?'—':value}</td>)}</tr>)}</tbody></table></div><div className="report-controls flex justify-between items-center gap-3 mt-5"><p className="text-xs text-slate-500">Page {current} of {pages}. Downloads and printing include all matching records.</p><div className="flex gap-3"><Button variant="secondary" disabled={current<=1} onClick={()=>setPage(current-1)}>Previous</Button><Button variant="secondary" disabled={current>=pages} onClick={()=>setPage(current+1)}>Next</Button></div></div></>:<p className="text-sm text-slate-500 py-8">No records found for this report and filters.</p>}
+ </CardContent></Card></section>}
+ </div>
+}

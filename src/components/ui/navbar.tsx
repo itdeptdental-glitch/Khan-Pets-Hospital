@@ -11,6 +11,7 @@ const navigation = [
  {name:'Doctors & staff',href:'/dashboard/doctors',icon:'doctors'},
  {name:'Procedures',href:'/dashboard/procedures',icon:'procedures'},
  {name:'Inventory',href:'/dashboard/inventory',icon:'inventory'},
+ {name:'Reports',href:'/dashboard/reports',icon:'records'},
  {name:'Medical records',href:'/dashboard/medical-records',icon:'records'},
 ]
 export function Navbar() {

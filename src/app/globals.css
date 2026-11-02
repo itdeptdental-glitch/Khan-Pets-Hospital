@@ -89,3 +89,12 @@
 .patient-history article{padding:12px;background:#f6f9f8;border:1px solid #e3ece8;border-radius:10px;margin-bottom:10px;font-size:12px;overflow-wrap:anywhere}
 .patient-history article p{color:#5b717a;margin:4px 0}.patient-history article strong{font-weight:600;color:#224850}
 @media(max-width:760px){.patient-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.patient-history{grid-template-columns:1fr}}
+
+.report-print-table{display:none}
+@media print{
+@page{size:landscape;margin:12mm}
+.sidebar,.workspace-topbar,.report-controls{display:none!important}
+.app-shell,.workspace,.workspace-main{display:block!important;margin:0!important;padding:0!important;width:100%!important;max-width:none!important}
+.report-screen-table{display:none!important}.report-print-table{display:block}
+.report-output{color:#000}.report-output table{width:100%;border-collapse:collapse;table-layout:auto}.report-output th,.report-output td{font-size:9px;padding:6px;border:1px solid #ccc;overflow-wrap:anywhere;white-space:normal}.report-output thead{display:table-header-group}.report-output tr{break-inside:avoid}
+}

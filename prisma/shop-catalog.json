@@ -1,0 +1,308 @@
+[
+  {
+    "name": "Adjustable dog collar",
+    "category": "Accessories",
+    "price": 450,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Cat collar with bell",
+    "category": "Accessories",
+    "price": 300,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Nylon dog leash (1.5 m)",
+    "category": "Accessories",
+    "price": 650,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Adjustable pet harness",
+    "category": "Accessories",
+    "price": 1200,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Retractable dog leash (5 m)",
+    "category": "Accessories",
+    "price": 2200,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet carrier (medium)",
+    "category": "Accessories",
+    "price": 4500,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet bed (medium)",
+    "category": "Accessories",
+    "price": 2800,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Stainless steel feeding bowl",
+    "category": "Accessories",
+    "price": 550,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Double feeding bowl",
+    "category": "Accessories",
+    "price": 950,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Cat litter tray",
+    "category": "Accessories",
+    "price": 1400,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Clumping cat litter (5 L)",
+    "category": "Accessories",
+    "price": 1250,
+    "unit": "bag",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet grooming brush",
+    "category": "Accessories",
+    "price": 700,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet nail clipper",
+    "category": "Accessories",
+    "price": 600,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet shampoo (250 ml)",
+    "category": "Accessories",
+    "price": 850,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet waste bags (60 bags)",
+    "category": "Accessories",
+    "price": 450,
+    "unit": "pack",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Elizabethan recovery collar",
+    "category": "Accessories",
+    "price": 900,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Rubber chew toy",
+    "category": "Pet toys",
+    "price": 500,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Cat teaser wand",
+    "category": "Pet toys",
+    "price": 350,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Tennis ball set (3 balls)",
+    "category": "Pet toys",
+    "price": 600,
+    "unit": "pack",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Cat scratching post",
+    "category": "Pet toys",
+    "price": 2400,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Sterile saline 0.9% (500 ml)",
+    "category": "Medicine",
+    "price": 250,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Povidone iodine solution (100 ml)",
+    "category": "Medicine",
+    "price": 300,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Veterinary wound care spray (100 ml)",
+    "category": "Medicine",
+    "price": 650,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet multivitamin supplement (100 ml)",
+    "category": "Medicine",
+    "price": 950,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet calcium supplement (100 ml)",
+    "category": "Medicine",
+    "price": 850,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet oral care gel (50 g)",
+    "category": "Medicine",
+    "price": 900,
+    "unit": "tube",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Pet ear cleaning solution (100 ml)",
+    "category": "Medicine",
+    "price": 750,
+    "unit": "bottle",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Veterinary electrolyte powder (100 g)",
+    "category": "Medicine",
+    "price": 450,
+    "unit": "pack",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Sterile gauze pads (10 pads)",
+    "category": "Medicine",
+    "price": 200,
+    "unit": "pack",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Cotton bandage roll (10 cm)",
+    "category": "Medicine",
+    "price": 120,
+    "unit": "roll",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Self-adhesive veterinary bandage (5 cm)",
+    "category": "Medicine",
+    "price": 250,
+    "unit": "roll",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Disposable syringe (5 ml)",
+    "category": "Medicine",
+    "price": 35,
+    "unit": "piece",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Examination gloves (100 gloves)",
+    "category": "Medicine",
+    "price": 1200,
+    "unit": "box",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  },
+  {
+    "name": "Medical adhesive tape (1 inch)",
+    "category": "Medicine",
+    "price": 150,
+    "unit": "roll",
+    "quantity": 0,
+    "reorderLevel": 5,
+    "description": "Starter catalog: sample price in PKR; edit to your actual selling price. Opening stock has not been entered."
+  }
+]

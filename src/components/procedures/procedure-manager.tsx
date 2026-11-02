@@ -1,5 +1,6 @@
 'use client'
 import { FormEvent, useRef, useState } from 'react'
+import { procedureCatalog, type CatalogProcedure } from '@/lib/procedures/catalog'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icon'
@@ -9,6 +10,9 @@ const money=new Intl.NumberFormat('en-PK',{style:'currency',currency:'PKR'})
 function localInput(value:string){const date=new Date(value);return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16)}
 export function ProcedureManager({initialItems,pets,staff}:{initialItems:ProcedureEntry[];pets:ProcedurePet[];staff:string[]}) {
  const [items,setItems]=useState(initialItems)
+ const [catalogQuery,setCatalogQuery]=useState('')
+ const [catalogCategory,setCatalogCategory]=useState('All services')
+ const [showCatalog,setShowCatalog]=useState(true)
  const [query,setQuery]=useState('')
  const [category,setCategory]=useState('All procedures')
  const [status,setStatus]=useState('All statuses')
@@ -20,9 +24,9 @@ export function ProcedureManager({initialItems,pets,staff}:{initialItems:Procedu
  const [message,setMessage]=useState('')
  const formRef=useRef<HTMLFormElement>(null)
  const visible=items.filter(item=>(category==='All procedures'||item.category===category)&&(status==='All statuses'||item.status===status)&&`${item.name} ${item.petName} ${item.performedBy||''}`.toLowerCase().includes(query.trim().toLowerCase()))
- function start(item?:ProcedureEntry){
+ function start(item?:ProcedureEntry,service?:CatalogProcedure){
   setError('');setMessage('');setEditing(item?.id??null)
-  setForm(item?{petId:item.petId,name:item.name,category:item.category,date:localInput(item.date),status:item.status,performedBy:item.performedBy??'',fee:item.fee===null?'':String(item.fee),notes:item.notes??''}:{...blank,date:localInput(new Date().toISOString())})
+  setForm(item?{petId:item.petId,name:item.name,category:item.category,date:localInput(item.date),status:item.status,performedBy:item.performedBy??'',fee:item.fee===null?'':String(item.fee),notes:item.notes??''}:{...blank,...(service?{name:service.name,category:service.category}:{}),date:localInput(new Date().toISOString())})
   setOpen(true)
   requestAnimationFrame(()=>{formRef.current?.scrollIntoView({behavior:'smooth',block:'center'});formRef.current?.querySelector('select')?.focus({preventScroll:true})})
  }
@@ -38,6 +42,7 @@ export function ProcedureManager({initialItems,pets,staff}:{initialItems:Procedu
   finally{setSaving(false)}
  }
  return <div className="space-y-6"><div className="flex items-center justify-between gap-4 flex-wrap"><div><p className="eyebrow mb-1">From grooming to clinical care</p><h1>Procedures</h1><p>Plan and record every pet service in one place.</p></div><Button onClick={()=>start()} disabled={pets.length===0}><span aria-hidden="true">+</span>Add procedure</Button></div>
+ <Card><CardHeader><div className="flex justify-between items-center gap-4"><div><h2 className="text-lg font-semibold">Hospital procedure catalog</h2><p className="text-sm text-slate-500 mt-1">55 services. Choose a service, then select a patient, date, staff member and fee.</p></div><Button variant="secondary" aria-expanded={showCatalog} aria-controls="procedure-catalog" onClick={()=>setShowCatalog(!showCatalog)}>{showCatalog?'Hide catalog':'Browse catalog'}</Button></div></CardHeader>{showCatalog&&<CardContent><div id="procedure-catalog"><div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5"><label className="inventory-field">Search service catalog<input type="search" value={catalogQuery} onChange={e=>setCatalogQuery(e.target.value)} placeholder="Search vaccination, surgery, test…"/></label><label className="inventory-field">Service category<select value={catalogCategory} onChange={e=>setCatalogCategory(e.target.value)}><option>All services</option>{procedureCategories.map(value=><option key={value}>{value}</option>)}</select></label></div><div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">{procedureCatalog.filter(service=>(catalogCategory==='All services'||service.category===catalogCategory)&&(service.name+' '+service.category).toLowerCase().includes(catalogQuery.trim().toLowerCase())).map(service=><article key={service.name} className="rounded-lg border border-slate-200 p-4 flex justify-between items-center gap-3"><div><h3 className="text-sm font-semibold">{service.name}</h3><p className="text-xs text-slate-500 mt-1">{service.category}</p></div><Button variant="secondary" size="sm" disabled={!pets.length} aria-label={'Use '+service.name} onClick={()=>start(undefined,service)}>Use service</Button></article>)}</div>{!procedureCatalog.some(service=>(catalogCategory==='All services'||service.category===catalogCategory)&&(service.name+' '+service.category).toLowerCase().includes(catalogQuery.trim().toLowerCase()))&&<p className="text-sm text-slate-500 py-5">No services match your search.</p>}</div></CardContent>}</Card>
  <div className="stat-grid">{[['All procedures',items.length],['Scheduled',items.filter(item=>item.status==='Scheduled').length],['In progress',items.filter(item=>item.status==='In progress').length],['Completed',items.filter(item=>item.status==='Completed').length]].map(([label,value])=><Card key={label}><div className="stat-card"><div className="flex justify-between items-center"><p className="text-xs text-slate-500">{label}</p><span className="text-teal-700"><Icon name="procedures"/></span></div><p className="stat-value">{value}</p></div></Card>)}</div>
  <div className="procedure-categories" aria-label="Filter by procedure type">{procedureCategories.map(value=><button key={value} onClick={()=>setCategory(category===value?'All procedures':value)} aria-pressed={category===value} className={`procedure-category ${category===value?'selected':''}`}>{value}</button>)}</div>
  {pets.length===0&&<p role="status" className="text-sm text-slate-600">Register a pet before adding a procedure.</p>}
@@ -45,7 +50,7 @@ export function ProcedureManager({initialItems,pets,staff}:{initialItems:Procedu
  {open&&<Card><CardHeader><h2 className="text-lg font-semibold">{editing?'Edit procedure':'Add procedure'}</h2><p className="text-sm text-slate-500 mt-1">Choose a pet, describe the service, and track its progress.</p></CardHeader><CardContent><form ref={formRef} onSubmit={submit} aria-label="Procedure details" className="space-y-6">{error&&<p role="alert" className="rounded-lg bg-red-50 text-red-700 p-3 text-sm">{error}</p>}<fieldset disabled={saving} className="grid grid-cols-1 md:grid-cols-2 gap-5"><legend className="sr-only">Procedure information</legend>
  <label htmlFor="procedure-pet" className="inventory-field">Pet *<select id="procedure-pet" required value={form.petId} onChange={e=>field('petId',e.target.value)}><option value="">Select a pet</option>{pets.map(pet=><option key={pet.id} value={pet.id}>{pet.name} ({pet.species}) - {pet.owner.firstName} {pet.owner.lastName}</option>)}</select></label>
  <label htmlFor="procedure-category" className="inventory-field">Procedure type *<select id="procedure-category" value={form.category} onChange={e=>field('category',e.target.value)}>{procedureCategories.map(value=><option key={value}>{value}</option>)}</select></label>
- <label className="inventory-field md:col-span-2">Procedure name *<input maxLength={191} required value={form.name} onChange={e=>field('name',e.target.value)} placeholder={procedureExamples[form.category]}/></label>
+ <label className="inventory-field md:col-span-2">Procedure name *<input list="hospital-procedure-names" maxLength={191} required value={form.name} onChange={e=>{const name=e.target.value;const service=procedureCatalog.find(item=>item.name===name);setForm(previous=>({...previous,name,...(service?{category:service.category}:{})}))}} placeholder={procedureExamples[form.category]}/><datalist id="hospital-procedure-names">{procedureCatalog.filter(service=>service.category===form.category).map(service=><option key={service.name} value={service.name}/>)}</datalist><span className="text-xs font-normal text-slate-500">Select a suggested service or enter a custom procedure.</span></label>
  <label className="inventory-field">Date and time *<input type="datetime-local" required value={form.date} onChange={e=>field('date',e.target.value)}/><span className="text-xs font-normal text-slate-500">Uses your device&apos;s local time.</span></label>
  <label htmlFor="procedure-status" className="inventory-field">Status *<select id="procedure-status" value={form.status} onChange={e=>field('status',e.target.value)}>{procedureStatuses.map(value=><option key={value}>{value}</option>)}</select></label>
  <label className="inventory-field">Staff member<input list="procedure-staff" maxLength={191} value={form.performedBy} onChange={e=>field('performedBy',e.target.value)} placeholder="Select or enter a staff member"/><datalist id="procedure-staff">{staff.map(value=><option key={value} value={value}/>)}</datalist></label>
