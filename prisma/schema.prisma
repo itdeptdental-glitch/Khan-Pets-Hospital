@@ -256,3 +256,14 @@ model PetProcedure {
  @@index([date])
  @@index([category])
 }
+
+model AppointmentBill {
+ id String @id @default(uuid())
+ appointmentId String @unique
+ snapshot Json
+ total Decimal @db.Decimal(14,2)
+ paid Decimal @db.Decimal(14,2)
+ method String? @db.VarChar(30)
+ reference String?
+ createdAt DateTime @default(now())
+}

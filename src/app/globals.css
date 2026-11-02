@@ -98,3 +98,7 @@
 .report-screen-table{display:none!important}.report-print-table{display:block}
 .report-output{color:#000}.report-output table{width:100%;border-collapse:collapse;table-layout:auto}.report-output th,.report-output td{font-size:9px;padding:6px;border:1px solid #ccc;overflow-wrap:anywhere;white-space:normal}.report-output thead{display:table-header-group}.report-output tr{break-inside:avoid}
 }
+
+@media print{.bill-controls{display:none!important}.bill-document{border:0!important;padding:0!important;border-radius:0!important}.bill-document table{width:100%;border-collapse:collapse}.bill-document th,.bill-document td{padding:10px;border-bottom:1px solid #ccc}.bill-document tr{break-inside:avoid}.bill-document header{font-size:11px;overflow-wrap:anywhere}.bill-page{font-size:12px}}
+
+@media print{@page patientBill{size:A4 portrait;margin:12mm}.bill-document{page:patientBill}}

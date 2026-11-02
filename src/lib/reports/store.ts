@@ -34,7 +34,13 @@ export async function generateReport(type:ReportType, from?:string, to?:string):
  result.dateBasis='Service date';result.columns=['Date','Service','Patient','Owner','Status','Recorded fee']
  result.rows=[...procedures.map(p=>[day(p.date),p.name,p.pet.name,ownerName(p.pet.owner),p.status,p.fee!.toFixed(2)]),...grooming.map(g=>[day(g.date),g.serviceType,g.pet.name,ownerName(g.pet.owner),g.status,g.price!.toFixed(2)])].sort((a,b)=>String(b[0]).localeCompare(String(a[0])))
  result.note='Recorded fees are service charges, not confirmed payments or revenue. Currency is not configured in this app.';break}
- case 'payments':result.dateBasis='Payment date';result.columns=['Date','Patient','Owner','Amount','Method','Status'];result.note='Payment transactions are not stored in this app yet. No payment totals can be generated. Use Service charges to review recorded procedure and grooming fees.';break
+ case 'payments':{
+ const start=from?new Date(from+'T00:00:00+05:00'):new Date('1000-01-01T00:00:00Z')
+ const end=to?new Date(new Date(to+'T00:00:00+05:00').getTime()+86400000):new Date('9999-12-31T00:00:00Z')
+ const records=await prisma.$queryRaw<{id:string;snapshot:unknown;total:unknown;paid:unknown;method:string|null;reference:string|null;createdAt:Date}[]>`SELECT id,snapshot,total,paid,method,reference,createdAt FROM AppointmentBill WHERE createdAt >= ${start} AND createdAt < ${end} ORDER BY createdAt DESC LIMIT 10001`
+ result.dateBasis='Attendance / payment date';result.columns=['Date','Bill','Patient','Owner','Doctor','Bill total (PKR)','Paid (PKR)','Balance (PKR)','Method','Reference','Status']
+ result.rows=records.map(r=>{const snapshot=(typeof r.snapshot==='string'?JSON.parse(r.snapshot):r.snapshot) as {petName:string;ownerName:string;doctorName:string};const total=Number(r.total),paid=Number(r.paid),balance=Math.round((total-paid)*100)/100;return [new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Karachi'}).format(r.createdAt),r.id,snapshot.petName,snapshot.ownerName,snapshot.doctorName,total.toFixed(2),paid.toFixed(2),balance.toFixed(2),r.method??'',r.reference??'',balance===0?'Paid':paid>0?'Partially paid':'Unpaid']})
+ result.note='PKR. Records show the payment entered at attendance; unpaid bills are included with their balance.';break}
  case 'inventory':{
  const records=await prisma.inventoryItem.findMany({where:created,orderBy:{name:'asc'},take:limit})
  result.columns=['Item','Category','Brand','Quantity','Unit','Unit price','Stock value','Reorder level','Stock status','Expiry date','Created']
