@@ -11,6 +11,7 @@ const navigation = [
  {name:'Doctors & staff',href:'/dashboard/doctors',icon:'doctors'},
  {name:'Procedures',href:'/dashboard/procedures',icon:'procedures'},
  {name:'Inventory',href:'/dashboard/inventory',icon:'inventory'},
+ {name:'Payment Counter',href:'/dashboard/payments',icon:'payments'},
  {name:'Reports',href:'/dashboard/reports',icon:'records'},
  {name:'Medical records',href:'/dashboard/medical-records',icon:'records'},
 ]

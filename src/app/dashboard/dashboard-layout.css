@@ -1,0 +1,13 @@
+/* Shared dashboard sizing: use the space beside the sidebar at every viewport. */
+.workspace{min-width:0}
+.workspace-main{box-sizing:border-box;width:100%;max-width:none;margin:0;min-width:0;padding-left:clamp(18px,2vw,36px);padding-right:clamp(18px,2vw,36px)}
+.workspace-main>*,.workspace-main :where(.grid,.flex,.ui-card,.ui-card-content,.ui-card-header,form,fieldset,section){min-width:0}
+.workspace-main :where(input:not([type=checkbox]):not([type=radio]),select,textarea){min-width:0;max-width:100%;box-sizing:border-box}
+.workspace-main .overflow-x-auto{min-width:0;max-width:100%;overflow-x:auto}
+.workspace-main :where(h1,h2,h3,.inventory-field){overflow-wrap:anywhere}
+.workspace-topbar{min-width:0;flex-wrap:wrap}
+@media(max-width:760px){.workspace{margin-left:0;width:100%}.workspace-main{padding-left:16px;padding-right:16px}.sidebar{box-sizing:border-box;min-width:0;max-width:100%}.sidebar nav{min-width:0;max-width:100%}.workspace-topbar{padding-left:16px;padding-right:16px}}
+@media print{.workspace-main{padding:0!important;width:100%!important;max-width:none!important}}
+
+.app-shell{width:100%;max-width:100%;overflow-x:clip}
+.workspace-main form{width:100%;max-width:none}

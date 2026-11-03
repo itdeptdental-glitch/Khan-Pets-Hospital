@@ -1,0 +1,3 @@
+import { prisma } from '@/lib/db/prisma'
+import type { Bill, BillSnapshot } from '@/lib/appointments/bills'
+export async function getInventorySale(id:string):Promise<Bill|null>{const rows=await prisma.$queryRaw<{id:string;billNumber:string;snapshot:string|BillSnapshot;total:unknown;paid:unknown;method:string|null;reference:string|null;createdAt:Date}[]>`SELECT id,billNumber,snapshot,total,paid,method,reference,createdAt FROM InventorySale WHERE id=${id}`;const row=rows[0];return row?{...row,appointmentId:'',snapshot:typeof row.snapshot==='string'?JSON.parse(row.snapshot):row.snapshot,total:Number(row.total),paid:Number(row.paid),createdAt:row.createdAt.toISOString()}:null}

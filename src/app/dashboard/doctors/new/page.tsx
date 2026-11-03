@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 
 export default function NewDoctorPage() {
   const router = useRouter()
+  const [error,setError]=useState('')
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -15,12 +16,13 @@ export default function NewDoctorPage() {
     department: '',
     email: '',
     password: '',
-    role: 'DOCTOR',
+    role: 'VETERINARIAN',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
     try {
       const response = await fetch('/api/doctors', {
@@ -31,10 +33,12 @@ export default function NewDoctorPage() {
 
       if (response.ok) {
         router.push('/dashboard/doctors')
+        router.refresh()
       } else {
-        alert('Failed to create staff member')
+        const result=await response.json()
+        setError(result.error||'Failed to create staff member')
       }
-    } catch { alert('An error occurred')
+    } catch { setError('Unable to reach the server. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -57,6 +61,7 @@ export default function NewDoctorPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
+            {error&&<p role="alert" className="rounded-lg bg-red-50 text-red-700 p-4 text-sm">{error}</p>}
             {/* Personal Information */}
             <div className="space-y-4">
               <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">Personal Information</h4>
@@ -66,6 +71,7 @@ export default function NewDoctorPage() {
                   </label><input id="name"
                     type="text"
                     name="name"
+                    maxLength={191}
                     required
                     value={formData.name}
                     onChange={handleChange}
@@ -78,6 +84,7 @@ export default function NewDoctorPage() {
                   </label><input id="specialty"
                     type="text"
                     name="specialty"
+                    maxLength={191}
                     value={formData.specialty}
                     onChange={handleChange}
                     placeholder="Enter specialty"
@@ -89,6 +96,7 @@ export default function NewDoctorPage() {
                   </label><input id="department"
                     type="text"
                     name="department"
+                    maxLength={191}
                     value={formData.department}
                     onChange={handleChange}
                     placeholder="Enter department"
@@ -100,6 +108,7 @@ export default function NewDoctorPage() {
                   </label><input id="phone"
                     type="tel"
                     name="phone"
+                    maxLength={30}
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Enter phone number"
@@ -118,6 +127,7 @@ export default function NewDoctorPage() {
                   </label><input id="email"
                     type="email"
                     name="email"
+                    maxLength={191}
                     required
                     value={formData.email}
                     onChange={handleChange}
@@ -147,7 +157,7 @@ export default function NewDoctorPage() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
                   >
-                    <option value="DOCTOR">Doctor</option>
+                    <option value="VETERINARIAN">Doctor</option>
                     <option value="STAFF">Staff</option>
                     <option value="ADMIN">Admin</option>
                   </select>

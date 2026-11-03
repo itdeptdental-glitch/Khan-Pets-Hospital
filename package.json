@@ -11,7 +11,8 @@
     "seed": "node scripts/seed.mjs",
     "db:deploy": "node scripts/database.mjs",
     "db:migrate": "node scripts/database.mjs dev",
-    "seed:shop": "node scripts/seed-shop.mjs"
+    "seed:shop": "node scripts/seed-shop.mjs",
+    "seed:payments": "node scripts/seed-payments.mjs"
   },
   "prisma": {
     "seed": "node scripts/seed.mjs"

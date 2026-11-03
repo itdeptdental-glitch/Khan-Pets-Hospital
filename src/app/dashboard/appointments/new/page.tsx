@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 
 interface Patient {
   id: string
-  firstName: string
-  lastName: string
+  name: string
+  species: string
+  owner?: {firstName:string;lastName:string;phone:string}
 }
 
 interface Doctor {
@@ -19,12 +20,14 @@ interface Doctor {
 
 export default function NewAppointmentPage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [error,setError]=useState('')
+ const [loading, setLoading] = useState(false)
+  const [patientSearch,setPatientSearch]=useState('')
   const [patients, setPatients] = useState<Patient[]>([])
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [formData, setFormData] = useState({
-    patientId: '',
-    doctorId: '',
+    petId: '',
+    veterinarianId: '',
     date: '',
     time: '',
     reason: '',
@@ -39,6 +42,7 @@ export default function NewAppointmentPage() {
         fetch('/api/doctors'),
       ])
       
+      if(!patientsRes.ok||!doctorsRes.ok)throw new Error('Unable to load patients and doctors. Refresh the page and try again.')
       if (patientsRes.ok) {
         const patientsData = await patientsRes.json()
         setPatients(patientsData)
@@ -46,19 +50,24 @@ export default function NewAppointmentPage() {
       
       if (doctorsRes.ok) {
         const doctorsData = await doctorsRes.json()
-        setDoctors(doctorsData)
+        setDoctors(doctorsData.filter((doctor:{user?:{role?:string}})=>doctor.user?.role==='VETERINARIAN'))
       }
     } catch (error) {
-      console.error('Error fetching data:', error)
+      setError(error instanceof Error?error.message:'Unable to load patients and doctors.')
     }
   }
 
     void fetchData()
   }, [])
 
+  const normalizedSearch=patientSearch.trim().toLowerCase()
+  const matchingPatients=patients.filter(patient=>[patient.name,patient.owner?.firstName,patient.owner?.lastName,patient.owner?patient.owner.firstName+' '+patient.owner.lastName:''].some(value=>value?.toLowerCase().includes(normalizedSearch)))
+  const selectedPatient=patients.find(patient=>patient.id===formData.petId)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
     try {
       const response = await fetch('/api/appointments', {
@@ -66,16 +75,18 @@ export default function NewAppointmentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          date: new Date(formData.date),
+          date: formData.date,
         }),
       })
 
       if (response.ok) {
         router.push('/dashboard/appointments')
+        router.refresh()
       } else {
-        alert('Failed to schedule appointment')
+        const result=await response.json()
+        setError(result.error||'Failed to schedule appointment')
       }
-    } catch { alert('An error occurred')
+    } catch { setError('Unable to reach the server. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -98,33 +109,37 @@ export default function NewAppointmentPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
+            {error&&<p role="alert" className="rounded-lg bg-red-50 text-red-700 p-4 text-sm">{error}</p>}
             {/* Appointment Selection */}
             <div className="space-y-4">
               <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wide">Appointment Selection</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="patientId" className="block text-sm font-semibold text-slate-700 mb-2">Patient *
-                  </label><select id="patientId"
-                    name="patientId"
+                  <label htmlFor="patient-search" className="block text-sm font-semibold text-slate-700 mb-2">Search patient or owner</label><input id="patient-search" type="search" value={patientSearch} onChange={event=>{setPatientSearch(event.target.value);setFormData(previous=>({...previous,petId:''}))}} placeholder="Type pet name or owner name…" className="mb-3 w-full" aria-describedby="patient-search-help"/><p id="patient-search-help" className="text-xs text-slate-500 mb-3">{matchingPatients.length} matching patients. Select the pet below to book their appointment.</p>
+                  <label htmlFor="petId" className="block text-sm font-semibold text-slate-700 mb-2">Patient *
+                  </label><select id="petId"
+                    name="petId"
                     required
-                    value={formData.patientId}
+                    value={formData.petId}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
                   >
                     <option value="">Select Patient</option>
-                    {patients.map((patient) => (
+                    {matchingPatients.map((patient) => (
                       <option key={patient.id} value={patient.id}>
-                        {patient.firstName} {patient.lastName}
+                        {patient.name} ({patient.species}){patient.owner?' — '+patient.owner.firstName+' '+patient.owner.lastName:''}
                       </option>
                     ))}
                   </select>
+                  {selectedPatient&&<p className="text-xs text-teal-700 mt-3">Selected: {selectedPatient.name}{selectedPatient.owner?' · Owner: '+selectedPatient.owner.firstName+' '+selectedPatient.owner.lastName+' · '+selectedPatient.owner.phone:''}</p>}
+                  {!matchingPatients.length&&<p className="text-xs text-amber-700 mt-3">No patient matches this name. Clear the search or try the owner’s name.</p>}
                 </div>
                 <div>
-                  <label htmlFor="doctorId" className="block text-sm font-semibold text-slate-700 mb-2">Doctor *
-                  </label><select id="doctorId"
-                    name="doctorId"
+                  <label htmlFor="veterinarianId" className="block text-sm font-semibold text-slate-700 mb-2">Doctor *
+                  </label><select id="veterinarianId"
+                    name="veterinarianId"
                     required
-                    value={formData.doctorId}
+                    value={formData.veterinarianId}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-slate-900"
                   >

@@ -1,5 +1,6 @@
 import { SVGProps } from 'react'
 const paths: Record<string,string> = {
+ payments: 'M3 5h18v14H3z M3 9h18 M7 14h3 M15 14h2',
  procedures: 'M9 3h6v4H9z M9 5H5v16h14V5h-4 M8 12h8 M8 16h5',
  inventory: 'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10 M7 5l10 4',
  dashboard: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',

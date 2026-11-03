@@ -1,3 +1,4 @@
+import './dashboard-layout.css'
 import { Navbar } from '@/components/ui/navbar'
 import { Providers } from '@/components/providers'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

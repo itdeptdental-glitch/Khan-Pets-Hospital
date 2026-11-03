@@ -258,8 +258,33 @@ model PetProcedure {
 }
 
 model AppointmentBill {
+ billNumber String? @unique @db.VarChar(30)
  id String @id @default(uuid())
  appointmentId String @unique
+ snapshot Json
+ total Decimal @db.Decimal(14,2)
+ paid Decimal @db.Decimal(14,2)
+ method String? @db.VarChar(30)
+ reference String?
+ createdAt DateTime @default(now())
+}
+
+model BillingSequence {
+ id Int @id @default(autoincrement())
+}
+
+model ProcedureService {
+ id String @id @default(uuid())
+ name String @unique
+ category String
+ fee Decimal @db.Decimal(10,2)
+ samplePrice Boolean @default(false)
+}
+
+model InventorySale {
+ id String @id
+ billNumber String @unique @db.VarChar(30)
+ requestHash String @db.VarChar(64)
  snapshot Json
  total Decimal @db.Decimal(14,2)
  paid Decimal @db.Decimal(14,2)

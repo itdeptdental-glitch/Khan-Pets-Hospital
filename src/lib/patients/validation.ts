@@ -1,4 +1,5 @@
 ﻿import { z } from 'zod'
+import { nextAppointmentInput } from '@/lib/appointments/validation'
 const optionalText=(max=191)=>z.string().trim().max(max).nullable().optional()
 const phone=z.string().trim().min(5,'Enter a valid phone number').max(30).regex(/^[+\d()\s.-]+$/,'Enter a valid phone number').refine(value=>value.replace(/\D/g,'').length>=7,'Enter a valid phone number')
 export const ownerInput=z.object({
@@ -26,6 +27,7 @@ export const petInput=z.object({
  color:optionalText(),
  microchipId:optionalText(),
  dateOfBirth:birthDate.nullable(),
+ appointment:nextAppointmentInput.optional(),
  allergies:optionalText(),
  notes:optionalText(),
 }).refine(value=>Boolean(value.ownerId)!==Boolean(value.owner),'Select an existing owner or enter a new owner')
