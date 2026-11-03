@@ -10,11 +10,11 @@ const prisma = new PrismaClient()
 async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10)
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@hospital.com' },
+  const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } }) ?? await prisma.user.upsert({
+    where: { email: 'noman@kph.com' },
     update: {},
     create: {
-      email: 'admin@hospital.com',
+      email: 'noman@kph.com',
       password: adminPassword,
       name: 'Admin User',
       role: 'ADMIN',
@@ -87,7 +87,7 @@ async function main() {
   const demo = await seedDemoPatients(prisma)
   console.log(`Demo patients added: ${demo.added}`)
   console.log('Database seeded successfully!')
-  console.log('Admin credentials: admin@hospital.com / admin123')
+  console.log('Admin account: '+admin.email+' (existing password preserved)')
   console.log('Doctor credentials: doctor@hospital.com / doctor123')
 }
 

@@ -292,3 +292,16 @@ model InventorySale {
  reference String?
  createdAt DateTime @default(now())
 }
+
+model RemovedUser {
+ userId String @id
+ removedAt DateTime @default(now())
+}
+
+model RemovedRecord {
+ kind String @db.VarChar(30)
+ recordId String @db.VarChar(220)
+ removedBy String
+ removedAt DateTime @default(now())
+ @@id([kind,recordId])
+}

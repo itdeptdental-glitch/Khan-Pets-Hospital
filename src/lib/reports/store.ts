@@ -1,3 +1,4 @@
+import { getRemovedIds } from '@/lib/records/removal'
 import { prisma } from '@/lib/db/prisma'
 import { formatPatientAge } from '@/lib/patients/age'
 import { reportTypes, type ReportType, type ReportResult } from './types'
@@ -10,7 +11,8 @@ export async function generateReport(type:ReportType, from?:string, to?:string):
  const result:ReportResult={title:reportTypes[type],dateBasis:'Registration / creation date',columns:[],rows:[]}
  switch(type){
  case 'patients':{
- const records=await prisma.pet.findMany({where:created,include:{owner:true},orderBy:{createdAt:'desc'},take:limit})
+ const removed=await getRemovedIds('patients')
+ const records=await prisma.pet.findMany({where:{...created,id:{notIn:removed}},include:{owner:true},orderBy:{createdAt:'desc'},take:limit})
  result.columns=['Patient','Species','Breed','Age','Date of birth','Gender','Weight (kg)','Owner','Owner phone','Registered']
  result.rows=records.map(p=>[p.name,p.species,p.breed??'',formatPatientAge(day(p.dateOfBirth)||null,p.age),day(p.dateOfBirth),p.gender,p.weight,ownerName(p.owner),p.owner.phone,day(p.createdAt)]);break}
  case 'owners':{
@@ -18,7 +20,8 @@ export async function generateReport(type:ReportType, from?:string, to?:string):
  result.columns=['Owner','Phone','Email','Address','Emergency contact','Emergency phone','Patients','Registered']
  result.rows=records.map(o=>[ownerName(o),o.phone,o.email??'',o.address??'',o.emergencyContact??'',o.emergencyPhone??'',o._count.pets,day(o.createdAt)]);break}
  case 'appointments':{
- const records=await prisma.appointment.findMany({where:{date:range},include:{pet:{include:{owner:true}},veterinarian:true},orderBy:{date:'desc'},take:limit})
+ const removed=await getRemovedIds('appointments')
+ const records=await prisma.appointment.findMany({where:{date:range,id:{notIn:removed}},include:{pet:{include:{owner:true}},veterinarian:true},orderBy:{date:'desc'},take:limit})
  result.dateBasis='Appointment date';result.columns=['Date','Time','Patient','Owner','Doctor','Status','Reason']
  result.rows=records.map(a=>[day(a.date),a.time,a.pet.name,ownerName(a.pet.owner),a.veterinarian.name,a.status,a.reason??'']);break}
  case 'doctors':case 'staff':{
@@ -42,7 +45,8 @@ export async function generateReport(type:ReportType, from?:string, to?:string):
  result.rows=records.map(r=>{const snapshot=(typeof r.snapshot==='string'?JSON.parse(r.snapshot):r.snapshot) as {petName:string;ownerName:string;doctorName:string};const total=Number(r.total),paid=Number(r.paid),balance=Math.round((total-paid)*100)/100;return [new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Karachi'}).format(r.createdAt),r.billNumber??'Unnumbered',snapshot.petName,snapshot.ownerName,snapshot.doctorName,total.toFixed(2),paid.toFixed(2),balance.toFixed(2),r.method??'',r.reference??'',balance===0?'Paid':paid>0?'Partially paid':'Unpaid']})
  result.note='PKR. Includes appointment and inventory sale payments. Unpaid bills are included with their balance.';break}
  case 'inventory':{
- const records=await prisma.inventoryItem.findMany({where:created,orderBy:{name:'asc'},take:limit})
+ const removed=await getRemovedIds('inventory')
+ const records=await prisma.inventoryItem.findMany({where:{...created,id:{notIn:removed}},orderBy:{name:'asc'},take:limit})
  result.columns=['Item','Category','Brand','Quantity','Unit','Unit price','Stock value','Reorder level','Stock status','Expiry date','Created']
  result.rows=records.map(i=>[i.name,i.category,i.brand??'',i.quantity,i.unit,i.price?.toFixed(2)??'',i.price?.mul(i.quantity).toFixed(2)??'',i.reorderLevel,i.quantity===0?'Out of stock':i.quantity<=i.reorderLevel?'Low stock':'In stock',day(i.expiryDate),day(i.createdAt)])
  result.note='Current inventory snapshot, filtered by item creation date. Stock value uses current quantity and price; it is not historical stock movement.';break}

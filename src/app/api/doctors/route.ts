@@ -13,6 +13,7 @@ export async function POST(request:Request){
  const parsed=staffInput.safeParse(body);if(!parsed.success)return NextResponse.json({error:parsed.error.issues[0].message},{status:400})
  try{
  const {name,email,password,role,specialty,phone,department}=parsed.data
+ if(role==='ADMIN')return NextResponse.json({error:'This practice has one full-access administrator. Create a Doctor or Staff account instead.'},{status:409})
  const hashedPassword=await bcrypt.hash(password,10)
  const result=await prisma.$transaction(async tx=>{
  const user=await tx.user.create({data:{name,email,password:hashedPassword,role},select:{id:true,email:true,name:true,role:true}})

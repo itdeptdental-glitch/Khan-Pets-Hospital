@@ -1,3 +1,4 @@
+import { isRecordRemoved } from '@/lib/records/removal'
 import { prisma } from '@/lib/db/prisma'
 import { randomUUID } from 'node:crypto'
 import type { z } from 'zod'
@@ -10,7 +11,7 @@ export async function getProcedures():Promise<ProcedureEntry[]> {
 }
 export async function saveProcedure(input:z.infer<typeof procedureInput>,id?:string) {
  const pet=await prisma.pet.findUnique({where:{id:input.petId},select:{id:true}})
- if(!pet) return 'pet-missing'
+ if(!pet||await isRecordRemoved('patients',input.petId)) return 'pet-missing'
  const {petId,name,category,date,status,performedBy,fee,notes}=input
  const when=new Date(date)
  if(id){

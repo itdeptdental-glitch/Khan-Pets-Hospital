@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { DeleteRecordButton } from '@/components/records/delete-record-button'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { formatRegistrationDate } from '@/lib/patients/registration-date'
 import { formatPatientAge } from '@/lib/patients/age'
@@ -19,6 +20,7 @@ export function MedicalHistory({visits}:{visits:MedicalVisit[]}){
  <h3>Visit details</h3><dl className="patient-details"><Detail label="Attending doctor" value={v.doctor}/><Detail label="Reason / summary" value={v.reason}/><Detail label="Visit notes" value={v.notes}/></dl>
  {v.kind==='attendance'&&<><h3>Procedures &amp; additional work</h3>{v.procedures.length?<div className="overflow-x-auto"><table><thead><tr><th scope="col" className="text-left">Procedure / work done</th><th scope="col" className="text-left">Charge</th></tr></thead><tbody>{v.procedures.map((p,i)=><tr key={i}><td>{p.name}{p.additional&&<span className="text-xs text-slate-500 block">Additional work</span>}</td><td>{p.fee===null?'Not recorded':money(p.fee)}</td></tr>)}</tbody></table></div>:<p className="text-sm text-slate-500">No itemized procedures were saved for this older visit.</p>}</>}
  {v.bill&&<><h3>Payment summary {v.demo?'· Demo':''}</h3><dl className="patient-details"><Detail label="Invoice" value={v.bill.number}/><Detail label="Subtotal" value={money(v.bill.subtotal)}/><Detail label="Discount" value={money(v.bill.discount)}/><Detail label="Total payable" value={money(v.bill.total)}/><Detail label="Amount received" value={money(v.bill.paid)}/><Detail label="Balance due" value={money(Math.round((v.bill.total-v.bill.paid)*100)/100)}/><Detail label="Payment method" value={v.bill.method}/><Detail label="Payment reference" value={v.bill.reference}/></dl><Link href={v.bill.url} className="ui-button secondary sm mt-5">View / print bill</Link></>}
+ <div className="mt-6"><DeleteRecordButton kind="medical-records" id={v.id} label={v.petName+' medical record'}/></div>
  {v.demo&&<p className="text-xs text-amber-800 mt-5">Fictional demo record. No real payment was received.</p>}</div></details>)}</div>
  {!visible.length&&<p className="text-center text-sm text-slate-500 py-10">No attended patient visits match these filters. Attend an appointment to generate its medical record.</p>}
  <div className="flex justify-between items-center flex-wrap gap-3 mt-5"><p className="text-xs text-slate-500">Page {current} of {pages}</p><div className="flex gap-3"><button type="button" className="ui-button secondary sm" disabled={current===1} onClick={()=>setPage(current-1)}>Previous</button><button type="button" className="ui-button secondary sm" disabled={current===pages} onClick={()=>setPage(current+1)}>Next</button></div></div>

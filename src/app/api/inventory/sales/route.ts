@@ -1,3 +1,4 @@
+import { isRecordRemoved } from '@/lib/records/removal'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth'
 import { prisma } from '@/lib/db/prisma'
@@ -17,10 +18,10 @@ export async function POST(request:Request){
  const [existing]=await tx.$queryRaw<{id:string;requestHash:string}[]>`SELECT id,requestHash FROM InventorySale WHERE id=${sale.id}`
  if(existing){if(existing.requestHash!==hash)throw Error('REUSED');return {id:existing.id}}
  const pet=sale.petId?await tx.pet.findUnique({where:{id:sale.petId},include:{owner:true}}):null
- if(sale.petId&&!pet)throw Error('PATIENT')
+ if(sale.petId&&(!pet||await isRecordRemoved('patients',sale.petId,tx)))throw Error('PATIENT')
  const lines:{id:string;name:string;quantity:number;unit:string;unitPrice:number;total:number}[]=[]
  for(const item of [...sale.items].sort((a,b)=>a.id.localeCompare(b.id))){
- const [stock]=await tx.$queryRaw<{id:string;name:string;quantity:number;unit:string;price:unknown;expiryDate:Date|null}[]>`SELECT id,name,quantity,unit,price,expiryDate FROM InventoryItem WHERE id=${item.id} FOR UPDATE`
+ const [stock]=await tx.$queryRaw<{id:string;name:string;quantity:number;unit:string;price:unknown;expiryDate:Date|null}[]>`SELECT id,name,quantity,unit,price,expiryDate FROM InventoryItem WHERE id=${item.id} AND id NOT IN (SELECT recordId FROM RemovedRecord WHERE kind='inventory') FOR UPDATE`
  if(!stock)throw Error('MISSING')
  if(stock.quantity<item.quantity)throw Error('STOCK:'+stock.name)
  if(stock.price===null)throw Error('PRICE:'+stock.name)

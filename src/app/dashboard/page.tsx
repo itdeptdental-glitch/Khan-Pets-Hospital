@@ -1,3 +1,4 @@
+import { getRemovedIds } from '@/lib/records/removal'
 import './overview.css'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
@@ -11,8 +12,9 @@ import Link from 'next/link'
 export const dynamic='force-dynamic'
 export default async function DashboardPage(){
  const session=await getServerSession(authOptions);if(!session)redirect('/login')
+ const [removedPatients,removedAppointments]=await Promise.all([getRemovedIds('patients'),getRemovedIds('appointments')])
  const today=pakistanToday();const day=new Date(today+'T00:00:00Z')
- const [pets,owners,staff,appointments,inventory]=await Promise.all([prisma.pet.count(),prisma.owner.count(),prisma.staff.count({where:{isActive:true}}),prisma.appointment.groupBy({by:['status'],where:{date:{gte:day,lt:new Date(day.getTime()+86400000)}},_count:true}),getInventory()])
+ const [pets,owners,staff,appointments,inventory]=await Promise.all([prisma.pet.count({where:{id:{notIn:removedPatients}}}),prisma.owner.count(),prisma.staff.count({where:{isActive:true}}),prisma.appointment.groupBy({by:['status'],where:{id:{notIn:removedAppointments},date:{gte:day,lt:new Date(day.getTime()+86400000)}},_count:true}),getInventory()])
  const total=appointments.reduce((sum,a)=>sum+a._count,0),completed=appointments.find(a=>a.status==='COMPLETED')?._count??0,pending=appointments.filter(a=>['SCHEDULED','CONFIRMED'].includes(a.status)).reduce((sum,a)=>sum+a._count,0)
  const low=inventory.filter(i=>i.quantity<=i.reorderLevel).length
  const stats=[{label:'Registered patients',value:pets,icon:'patients',note:'Pets in your care',href:'/dashboard/patients',color:'teal'},{label:'Today’s appointments',value:total,icon:'appointments',note:pending+' waiting to be attended',href:'/dashboard/appointments',color:'blue'},{label:'Pet owners',value:owners,icon:'patients',note:'Your practice community',href:'/dashboard/patients',color:'amber'},{label:'Active team',value:staff,icon:'doctors',note:'Doctors & staff',href:'/dashboard/doctors',color:'violet'}]

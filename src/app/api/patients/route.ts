@@ -1,3 +1,4 @@
+import { isRecordRemoved, removeRecord } from '@/lib/records/removal'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { Prisma } from '@prisma/client'
@@ -21,6 +22,7 @@ async function write(request:Request,update:boolean){
  if(!parsed.success)return NextResponse.json({error:parsed.error.issues[0].message},{status:400})
  if(update&&parsed.data.appointment)return NextResponse.json({error:'Book further visits from Appointments.'},{status:400})
  if(update&&(typeof body.id!=='string'||!body.id||body.id.length>191))return NextResponse.json({error:'Invalid patient ID.'},{status:400})
+ if(update&&await isRecordRemoved('patients',body.id))return NextResponse.json({error:'Patient no longer exists.'},{status:404})
  try{
   const saved=await prisma.$transaction(async tx=>{
    const {ownerId,owner,dateOfBirth,breed,color,microchipId,allergies,notes,appointment,...details}=parsed.data
@@ -47,22 +49,4 @@ async function write(request:Request,update:boolean){
 export async function POST(request:Request){return write(request,false)}
 export async function PATCH(request:Request){return write(request,true)}
 
-export async function DELETE(request: Request) {
- if (!await getServerSession(authOptions)) return NextResponse.json({error:'Please sign in to manage patients.'},{status:401})
- let body
- try { body = await request.json() } catch { return NextResponse.json({error:'Invalid request.'},{status:400}) }
- if (typeof body?.id !== 'string' || !body.id || body.id.length > 191) return NextResponse.json({error:'Invalid patient ID.'},{status:400})
- try {
-  const outcome = await prisma.$transaction(async tx => {
-   const rows = await tx.$queryRaw<{id:string}[]>`SELECT id FROM Pet WHERE id=${body.id} FOR UPDATE`
-   if (!rows.length) return 'missing'
-   const pet = await tx.pet.findUniqueOrThrow({where:{id:body.id},select:{_count:{select:{appointments:true,medicalRecords:true,vaccinations:true,boarding:true,grooming:true,procedures:true}}}})
-   if (Object.values(pet._count).some(count=>count>0)) return 'linked'
-   await tx.pet.delete({where:{id:body.id}})
-   return 'removed'
-  })
-  if (outcome==='missing') return NextResponse.json({error:'Patient no longer exists.'},{status:404})
-  if (outcome==='linked') return NextResponse.json({error:'This patient has appointments or care records and cannot be removed. Its clinical history must be retained.'},{status:409})
-  return NextResponse.json({data:await getPatientData()})
- } catch(error) { console.error('Patient removal failed',error); return NextResponse.json({error:'Unable to remove patient.'},{status:500}) }
-}
+export async function DELETE(request:Request){const session=await getServerSession(authOptions);if(!session)return NextResponse.json({error:'Please sign in.'},{status:401});if(session.user.role!=='ADMIN')return NextResponse.json({error:'Administrator access is required.'},{status:403});let body;try{body=await request.json()}catch{return NextResponse.json({error:'Invalid request.'},{status:400})}if(typeof body.id!=='string'||!body.id||body.id.length>191)return NextResponse.json({error:'Invalid patient ID.'},{status:400});try{await removeRecord('patients',body.id,session.user.id);return NextResponse.json({data:await getPatientData()})}catch(error){if(error instanceof Error&&error.message==='NOT_FOUND')return NextResponse.json({error:'Patient not found.'},{status:404});console.error('Patient removal failed',error);return NextResponse.json({error:'Unable to remove patient.'},{status:500})}}

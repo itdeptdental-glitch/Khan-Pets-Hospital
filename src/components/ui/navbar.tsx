@@ -14,6 +14,7 @@ const navigation = [
  {name:'Payment Counter',href:'/dashboard/payments',icon:'payments'},
  {name:'Reports',href:'/dashboard/reports',icon:'records'},
  {name:'Medical records',href:'/dashboard/medical-records',icon:'records'},
+ {name:'Account Settings',href:'/dashboard/settings',icon:'settings'},
 ]
 export function Navbar() {
  const pathname = usePathname()

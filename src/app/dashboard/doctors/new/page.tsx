@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 export default function NewDoctorPage() {
   const router = useRouter()
+  const {data:session,status}=useSession()
   const [error,setError]=useState('')
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -48,11 +51,13 @@ export default function NewDoctorPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  if(status==='loading')return <p>Loading account access…</p>
+  if(session?.user.role!=='ADMIN')return <div className="space-y-4"><h1>Administrator access required</h1><p>Only the practice administrator can add doctors and staff.</p><Link className="ui-button secondary md" href="/dashboard/doctors">Back to doctors &amp; staff</Link></div>
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Add Staff Member</h1>
-        <p className="text-slate-600 mt-1">Add a new doctor or staff member to the hospital</p>
+        <p className="text-slate-600 mt-1">Add a doctor or staff profile for hospital work. Only the designated administrator can sign in.</p>
       </div>
 
       <Card className="border-0 shadow-lg bg-white">
@@ -159,7 +164,6 @@ export default function NewDoctorPage() {
                   >
                     <option value="VETERINARIAN">Doctor</option>
                     <option value="STAFF">Staff</option>
-                    <option value="ADMIN">Admin</option>
                   </select>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { isRecordRemoved } from '@/lib/records/removal'
 import { allocateBillNumber } from '@/lib/appointments/bill-number'
 import { randomUUID } from 'node:crypto'
 import { getServerSession } from 'next-auth'
@@ -15,7 +16,8 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
  if(input.action==='attend'&&input.procedures.some(p=>!services.some(s=>s.name===p.name)))return Response.json({error:'A selected procedure has changed or was removed. Refresh the page and select it again.'},{status:400})
  const result=await prisma.$transaction(async tx=>{
  const appointment=await tx.appointment.findUnique({where:{id},include:{veterinarian:true,pet:{include:{owner:true}}}})
- if(!appointment)throw new Error('NOT_FOUND')
+ if(!appointment||await isRecordRemoved('appointments',id,tx))throw new Error('NOT_FOUND')
+ if(input.next&&await isRecordRemoved('patients',appointment.petId,tx))throw new Error('NOT_FOUND')
  if(input.action==='attend'){
  const attending=await tx.staff.findFirst({where:{id:input.veterinarianId,isActive:true,user:{role:'VETERINARIAN'}},select:{id:true,name:true}})
  if(!attending)throw new Error('DOCTOR_MISSING')
